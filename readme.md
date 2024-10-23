@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-Hey there is folder -1
-=======
+
 #### Folder - 1 Getting Started
 
 ## it contains 1.mp4
->>>>>>> 893d12acebd5725b3c667ca24acd04d5bf698eb8
+
+![image](https://github.com/user-attachments/assets/40ffd3f2-49e9-45a6-b6e4-7b9de636d02f)
