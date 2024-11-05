@@ -29,56 +29,56 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
       run: |
-  node -e "
-    const { Octokit } = require('@octokit/rest');
-    const { MongoClient } = require('mongodb');
-  
-    async function fetchRepoStructure(repo, owner = 'learnlink-20') {
-      const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-      async function processFolder(path = '') {
-        const contents = await octokit.repos.getContent({ owner, repo, path });
-        const folderStructure = { readme: null, media: [], assets: [] };
-  
-        for (const item of contents.data) {
-          if (item.type === 'file') {
-            const rawUrl = item.download_url;
-            if (item.name.toLowerCase() === 'readme.md') {
-              folderStructure.readme = rawUrl;
-            } else if (/\.(mp4|jpg|png|jpeg)$/i.test(item.name)) {
-              folderStructure.media.push(rawUrl);
-            } else {
-              folderStructure.assets.push(rawUrl);
+        node -e "
+          const { Octokit } = require('@octokit/rest');
+          const { MongoClient } = require('mongodb');
+          
+          async function fetchRepoStructure(repo, owner = 'learnlink-20') {
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+            async function processFolder(path = '') {
+              const contents = await octokit.repos.getContent({ owner, repo, path });
+              const folderStructure = { readme: null, media: [], assets: [] };
+
+              for (const item of contents.data) {
+                if (item.type === 'file') {
+                  const rawUrl = item.download_url;
+                  if (item.name.toLowerCase() === 'readme.md') {
+                    folderStructure.readme = rawUrl;
+                  } else if (/\.(mp4|jpg|png|jpeg)$/i.test(item.name)) {
+                    folderStructure.media.push(rawUrl);
+                  } else {
+                    folderStructure.assets.push(rawUrl);
+                  }
+                } else if (item.type === 'dir') {
+                  folderStructure[item.name] = await processFolder(item.path);
+                }
+              }
+              return folderStructure;
             }
-          } else if (item.type === 'dir') {
-            folderStructure[item.name] = await processFolder(item.path);
+            return await processFolder();
           }
-        }
-        return folderStructure;
-      }
-      return await processFolder();
-    }
-  
-    async function main() {
-      const client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-      try {
-        await client.connect();
-        const db = client.db('myDatabase');
-        const collection = db.collection('repoStructures');
-  
-        const repo = 'lab-1';
-        const structure = await fetchRepoStructure(repo);
-  
-        await collection.updateOne(
-          { repo },
-          { $set: { structure, lastUpdated: new Date() } },
-          { upsert: true }
-        );
-  
-        console.log('Repository structure stored successfully');
-      } finally {
-        await client.close();
-      }
-    }
-  
-    main().catch(console.error);
-  "
+
+          async function main() {
+            const client = new MongoClient(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+            try {
+              await client.connect();
+              const db = client.db('myDatabase');
+              const collection = db.collection('repoStructures');
+
+              const repo = 'lab-1';
+              const structure = await fetchRepoStructure(repo);
+
+              await collection.updateOne(
+                { repo },
+                { $set: { structure, lastUpdated: new Date() } },
+                { upsert: true }
+              );
+
+              console.log('Repository structure stored successfully');
+            } finally {
+              await client.close();
+            }
+          }
+
+          main().catch(console.error);
+        "
