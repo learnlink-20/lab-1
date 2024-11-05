@@ -1,19 +1,17 @@
 name: Store Repository Structure in MongoDB
 
 on:
-  # Trigger on push to any branch
   push:
     branches:
       - '*'
     paths:
-      - '**/*.md'    # Any markdown file
-      - '**/*.jpg'   # jpg files
-      - '**/*.jpeg'  # jpeg files
-      - '**/*.png'   # png files
-      - '**/*.mp4'   # mp4 files
-      - '**/assets/**'  # anything in assets folders
+      - '**/*.md'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.png'
+      - '**/*.mp4'
+      - '**/assets/**'
   
-  # Trigger on pull request actions
   pull_request:
     types: [opened, synchronize, reopened, closed]
     paths:
@@ -24,13 +22,11 @@ on:
       - '**/*.mp4'
       - '**/assets/**'
     
-  # Watch for repository dispatch events
   repository_dispatch:
     types: [file_change]
     
-  # Keep the daily schedule for backup
   schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight
+    - cron: '0 0 * * *'
 
 jobs:
   storeRepoStructure:
@@ -39,7 +35,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch all history to track changes
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v3
